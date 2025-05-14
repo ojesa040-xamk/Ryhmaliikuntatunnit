@@ -14,7 +14,7 @@ apiTunnitRouter.get("/", async (req : express.Request, res : express.Response, n
     try {
         const kaikkiTunnit = await prisma.tunnit.findMany({
           include: {
-            ilmoittautuneita: true
+            osallistujat: true
           }
         });
     

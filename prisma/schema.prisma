@@ -12,15 +12,15 @@ datasource db {
 
 model Tunnit {
   TunnitId Int @id @default(autoincrement())
-  kayttajaId Int
   tunti String
   paivanmaara String
-  ilmoittautuneita Kayttajat @relation(fields: [kayttajaId], references: [kayttajaId])
+  kellonaika String?
+  osallistujat  Kayttajat[]  @relation("Ilmoittautumiset")
 }
 
 model Kayttajat {
   kayttajaId Int @id @default(autoincrement())
   kayttajatunnus String
   salasana String
-  ilmoittautumiset Tunnit[]
+  ilmoittautumiset Tunnit[]  @relation("Ilmoittautumiset")
 }

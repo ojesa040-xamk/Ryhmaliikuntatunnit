@@ -19,7 +19,7 @@ apiAuthRouter.post("/kirjautuminen", async (req : express.Request, res : express
             }
         });
         if (req.body.kayttajatunnus === kayttaja?.kayttajatunnus) {
-            let hash = crypto.createHash("SHA256").update(req.body.salasana).digest("hex");
+            let hash = crypto.createHash("sha512").update(req.body.salasana).digest("hex");
 
             if (hash === kayttaja?.salasana) {
                 let token = jwt.sign(
