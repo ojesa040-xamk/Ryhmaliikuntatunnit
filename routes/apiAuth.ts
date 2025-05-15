@@ -23,7 +23,8 @@ apiAuthRouter.post("/kirjautuminen", async (req : express.Request, res : express
 
             if (hash === kayttaja?.salasana) {
                 let token = jwt.sign(
-                { kayttajatunnus: kayttaja.kayttajatunnus },
+                { kayttajaId: kayttaja.kayttajaId,
+                  kayttajatunnus: kayttaja.kayttajatunnus },
                 "SalausAvainOk"
 );
 
@@ -57,14 +58,17 @@ apiAuthRouter.post("/rekisterointi", async (req, res, next) => {
 
     const hash = crypto.createHash("sha512").update(salasana).digest("hex");
 
-    await prisma.kayttajat.create({
+    const uusiKayttaja = await prisma.kayttajat.create({
       data: {
         kayttajatunnus,
         salasana: hash
       }
     });
 
-    const token = jwt.sign({ kayttajatunnus }, "SalausAvainOk");
+    const token = jwt.sign(
+      { kayttajatunnus: uusiKayttaja.kayttajatunnus,
+        kayttajaId: uusiKayttaja.kayttajaId
+      }, "SalausAvainOk");
     res.status(201).json({ token });
 
   } catch (e) {

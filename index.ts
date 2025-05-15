@@ -10,6 +10,7 @@ const app : express.Application = express();
 
 const portti : number = Number(process.env.PORT) || 3107;
 
+app.use(express.json());
 
 app.use(cors({origin: "http://localhost:3000"}));
 

@@ -11,9 +11,11 @@ export const checkToken = (req: Request, res: Response, next: NextFunction): voi
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, "SalausAvainOk") as { kayttajatunnus: string };
+    const decoded = jwt.verify(token, "SalausAvainOk") as {
+      kayttajaId: number;
+      kayttajatunnus: string };
 
-    (req as any).user = decoded;
+    (req as any).kayttaja = decoded;
 
     next();
   } catch (e) {

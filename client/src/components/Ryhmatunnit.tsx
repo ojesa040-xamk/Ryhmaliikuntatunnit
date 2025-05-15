@@ -1,6 +1,6 @@
 import { Alert, Backdrop, Box, Button, CircularProgress, Container, FormControl, InputLabel, List, ListItem, ListItemIcon, ListItemText, MenuItem, Select, Stack, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
-import { Link, useNavigate, type NavigateFunction } from "react-router-dom"
+import { useNavigate, type NavigateFunction } from "react-router-dom"
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 
 
@@ -9,8 +9,14 @@ interface Tunnit {
     tunti : string
     paivanmaara : string
     kellonaika : string
+    osallistujat : Kayttajat[];
 }
 
+interface Kayttajat {
+    kayttajaId: number
+    kayttajatunnus: string
+    ilmoittautumiset: Tunnit[];
+}
 interface apiData {
     tunnit : Tunnit[]
     virhe : string
@@ -26,6 +32,7 @@ const Ryhmatunnit : React.FC<Props> = ({token, setToken}) : React.ReactElement =
 
     const navigate : NavigateFunction = useNavigate();
     const [valittuPaiva, setValittuPaiva] = useState<string>("Maanantai 26.5.25");
+    const [kayttaja, setKayttaja] = useState<Kayttajat | null>(null);
 
     const [apiData, setApiData] = useState<apiData>({
         tunnit : [],
@@ -80,9 +87,82 @@ const Ryhmatunnit : React.FC<Props> = ({token, setToken}) : React.ReactElement =
     }
     }
 
-    useEffect(() => {
-        apiKutsu();
-    }, []);
+    const ilmoittaudu = async (TunnitId : number) => {
+      try {
+        const response = await fetch(`http://localhost:3107/api/tunnit/${TunnitId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type":"application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error("Virhe palvelimessa");
+        }
+
+        alert("Ilmoittautuminen onnistui!")
+        await haeKayttaja();
+      } catch (error) {
+        console.error("Ilmoittautuminen epäonnistui:", error);
+        alert("Ilmoittautuminen epäonnistui");
+      }
+    };
+
+    const haeKayttaja = async () => {
+      try {
+        const response = await fetch("http://localhost:3107/api/tunnit/kayttajaId", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setKayttaja(data);
+      } else {
+        console.error("Käyttäjää ei syötetty");
+      }
+      } catch (e) {
+        console.error("Virhe käyttäjää haettaessa:", e);
+      }
+    };
+
+    const peruIlmoittautuminen = async (TunnitId: number) => {
+      try {
+        const response = await fetch(`http://localhost:3107/api/tunnit/peru/${TunnitId}`, {
+        method: "PUT",
+        headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+      throw new Error("Virhe peruuttaessa ilmoittautumista");
+    }
+
+    alert("Ilmoittautuminen peruttu");
+    await haeKayttaja();
+    
+      } catch (error) {
+        console.error("Peruutus epäonnistui:", error);
+        alert("Peruutus epäonnistui");
+      }
+    };
+
+     useEffect(() => {
+      const haeTiedot = async () => {
+       await apiKutsu();
+       if (token) {
+         await haeKayttaja();
+       }
+      };
+
+     haeTiedot();
+      }, [token]);
+
+      useEffect(() => {
+}, [kayttaja]);
 
 return (
   <Container sx={{textAlign:'center', backgroundColor:"rgb(207, 248, 255)", padding:"2em", boxShadow: '2px 2px 10px rgba(0, 0, 0, 0.2)'}}>
@@ -125,30 +205,72 @@ return (
                   boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.2)",
                 }}
               >
-                {token && (
-                  <Link 
-                  to={`/ilmoittaudu/${tunnit.TunnitId}`} 
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                    >
-                    <Box>
-                      <ListItemIcon sx={{ minWidth: 0 }}>
-                        <HowToRegIcon />
-                      </ListItemIcon>
-                      <Typography variant="body1">Ilmoittaudu</Typography>
-                    </Box>
-                  </Link>
-                )}
                 <ListItemText
                   primary={tunnit.tunti}
                   secondary={
-                    <Typography variant="body1" color="textPrimary">
-                      {tunnit.paivanmaara} klo {tunnit.kellonaika}
-                    </Typography>
+                      <Typography variant="body1" color="textPrimary">
+                        {tunnit.paivanmaara} klo {tunnit.kellonaika}
+                      </Typography>
                   }
                 />
+                {token && (
+                  <Box
+                    onClick={() => ilmoittaudu(tunnit.TunnitId)}
+                    sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                  >
+                  <ListItemIcon sx={{ minWidth: 0 }}>
+                  <HowToRegIcon />
+                  </ListItemIcon>
+                  <Typography variant="body1">Ilmoittaudu</Typography>
+                  </Box>
+                  )}
+                
               </ListItem>
             ))}
         </List>
+
+       {token && kayttaja && (
+  <>
+    <Typography variant="h6" sx={{ marginTop: 4 }}>
+      Aktiiviset ilmoittautumiset:
+    </Typography>
+
+    {kayttaja.ilmoittautumiset.length > 0 ? (
+      <List sx={{ maxWidth: "650px", margin: "auto", marginTop: 2 }}>
+        {kayttaja.ilmoittautumiset.map((tunti) => (
+          <ListItem
+            key={tunti.TunnitId}
+            sx={{ textAlign: "center", justifyContent: "space-between" }}
+            style={{
+              borderBottom: "1px solid",
+              boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            <ListItemText
+              primary={tunti.tunti}
+              secondary={
+                <Typography variant="body1" color="textPrimary">
+                  {tunti.paivanmaara} klo {tunti.kellonaika}
+                </Typography>
+              }
+            />
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => peruIlmoittautuminen(tunti.TunnitId)}
+            >
+              Peruuta
+            </Button>
+          </ListItem>
+        ))}
+      </List>
+    ) : (
+      <Typography>Ei ilmoittautumisia vielä.</Typography>
+    )}
+  </>
+)}
+
+            
 
         <Stack direction="row" spacing={2} sx={{ marginTop: 4, justifyContent: "center" }}>
           {!token ? (
