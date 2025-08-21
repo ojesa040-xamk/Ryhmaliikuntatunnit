@@ -6,7 +6,7 @@ This is my final assignment for my second application programming course. The ta
 
 I developed an application for booking group exercise classes. Prisma ORM was used to handle data storage, and two related data models were defined, as shown below.
 
-<p align="center"> <img src="https://imgur.com/a/sbCRzur.png" height="80%" width="80%" alt="PrismaData"/> </p>
+<p align="center"> <img src="https://imgur.com/eAG41Kx.png" height="80%" width="80%" alt="PrismaData"/> </p>
 
 The backend consists of two REST API routes: apiAuth and apiTunnit. The apiAuth route handles user login and sign-up. Express POST routes are used to process incoming requests from the client.
 
@@ -36,9 +36,13 @@ The main page allows users to select different dates from a dropdown menu. Booki
 
 <p align="center"> <img src="https://imgur.com/Yv8K1dc.png" height="80%" width="80%" alt="Main page"/> </p>
 
-After a successful login, a button for booking a class and a list of the classes the user is enrolled in are displayed. Users can cancel a booking using the "Peruuta" button and log out using the "Kirjaudu ulos" button.
+The image below shows the login page. The user enters their username and password and continues by clicking the "Kirjaudu" button. The user can also cancel the login and return to the main page. A button for registration is also provided.
 
 <p align="center"> <img src="https://imgur.com/g4gVx88.png" height="80%" width="80%" alt="login"/> </p>
+
+After a successful login, a button for booking a class and a list of the classes the user is enrolled in are displayed. Users can cancel a booking using the "Peruuta" button and log out using the "Kirjaudu ulos" button.
+
+<p align="center"> <img src="https://imgur.com/NHS2tV4.png" height="80%" width="80%" alt="login"/> </p>
 
 
 
